@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.GoodsDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.goods_name as goodsName
+        ,a.goods_types as goodsTypes
+        ,a.goods_kucun_number as goodsKucunNumber
+        ,a.gongyinghsang_id as gongyinghsangId
+        ,a.cangku_types as cangkuTypes
+        ,a.danwei as danwei
+        ,a.goods_new_money as goodsNewMoney
+        ,a.goods_content as goodsContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.GoodsView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,gongyinghsang.gongyinghsang_name as gongyinghsangName
+        ,gongyinghsang.gongyinghsang_types as gongyinghsangTypes
+        ,gongyinghsang.gongyinghsang_xinyong_types as gongyinghsangXinyongTypes
+        ,gongyinghsang.gongyinghsang_content as gongyinghsangContent
+
+        FROM goods  a
+        left JOIN gongyinghsang gongyinghsang ON a.gongyinghsang_id = gongyinghsang.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.goodsName != '' and params.goodsName != null and params.goodsName != 'null' ">
+                and a.goods_name like CONCAT('%',#{params.goodsName},'%')
+            </if>
+            <if test="params.goodsTypes != null and params.goodsTypes != ''">
+                and a.goods_types = #{params.goodsTypes}
+            </if>
+            <if test="params.goodsKucunNumberStart != null and params.goodsKucunNumberStart != ''">
+                <![CDATA[  and a.goods_kucun_number >= #{params.goodsKucunNumberStart}   ]]>
+            </if>
+            <if test="params.goodsKucunNumberEnd != null and params.goodsKucunNumberEnd != ''">
+                <![CDATA[  and a.goods_kucun_number <= #{params.goodsKucunNumberEnd}   ]]>
+            </if>
+             <if test="params.goodsKucunNumber != null and params.goodsKucunNumber != ''">
+                and a.goods_kucun_number = #{params.goodsKucunNumber}
+             </if>
+            <if test="params.gongyinghsangId != null and params.gongyinghsangId != ''">
+                and (
+                    a.gongyinghsang_id = #{params.gongyinghsangId}
+                )
+            </if>
+            <if test="params.cangkuTypes != null and params.cangkuTypes != ''">
+                and a.cangku_types = #{params.cangkuTypes}
+            </if>
+            <if test=" params.danwei != '' and params.danwei != null and params.danwei != 'null' ">
+                and a.danwei like CONCAT('%',#{params.danwei},'%')
+            </if>
+            <if test="params.goodsNewMoneyStart != null ">
+                <![CDATA[  and a.goods_new_money >= #{params.goodsNewMoneyStart}   ]]>
+            </if>
+            <if test="params.goodsNewMoneyEnd != null ">
+                <![CDATA[  and a.goods_new_money <= #{params.goodsNewMoneyEnd}   ]]>
+            </if>
+            <if test=" params.goodsContent != '' and params.goodsContent != null and params.goodsContent != 'null' ">
+                and a.goods_content like CONCAT('%',#{params.goodsContent},'%')
+            </if>
+
+                <!-- 判断供应商的id不为空 -->
+            <if test=" params.gongyinghsangIdNotNull != '' and params.gongyinghsangIdNotNull != null and params.gongyinghsangIdNotNull != 'null' ">
+                and a.gongyinghsang_id IS NOT NULL
+            </if>
+            <if test=" params.gongyinghsangName != '' and params.gongyinghsangName != null and params.gongyinghsangName != 'null' ">
+                and gongyinghsang.gongyinghsang_name like CONCAT('%',#{params.gongyinghsangName},'%')
+            </if>
+            <if test="params.gongyinghsangTypes != null  and params.gongyinghsangTypes != ''">
+                and gongyinghsang.gongyinghsang_types = #{params.gongyinghsangTypes}
+            </if>
+
+            <if test="params.gongyinghsangXinyongTypes != null  and params.gongyinghsangXinyongTypes != ''">
+                and gongyinghsang.gongyinghsang_xinyong_types = #{params.gongyinghsangXinyongTypes}
+            </if>
+
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(gongyinghsang.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(gongyinghsang.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test=" params.gongyinghsangContent != '' and params.gongyinghsangContent != null and params.gongyinghsangContent != 'null' ">
+                and gongyinghsang.gongyinghsang_content like CONCAT('%',#{params.gongyinghsangContent},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
